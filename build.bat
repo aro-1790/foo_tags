@@ -4,14 +4,11 @@ rem   build.bat [build ^| clean ^| cleandep ^| fetch], or with no arguments for 
 setlocal
 cd /d "%~dp0"
 
-set "VER_FILE=resource\version.txt"
-set "SRC_FILE=foo_tags.cpp"
 set "VSPF=%ProgramFiles(x86)%"
 if not defined VSPF set "VSPF=%ProgramFiles%"
 set "VSWHERE=%VSPF%\Microsoft Visual Studio\Installer\vswhere.exe"
 
 rem Called by build.nmake; not a user subcommand.
-if /i "%~1"=="--stampver" goto stampver
 if /i "%~1"=="--fetchdep" goto fetchdep
 
 set "TARGET="
@@ -48,12 +45,6 @@ if not defined VCToolsInstallDir (
 nmake /NOLOGO /f build.nmake %TARGET%
 exit /b %errorlevel%
 
-:stampver
-rem Stamps the version from resource\version.txt into the source in place, rewriting it
-rem only when it differs - no generated header, no temp file.
-if not exist obj mkdir obj
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$q=[char]34; $v=([IO.File]::ReadAllText('%VER_FILE%')).Trim().TrimStart('v'); $p='%SRC_FILE%'; $s=[IO.File]::ReadAllText($p); $pat='DECLARE_COMPONENT_VERSION\('+$q+'m-TAGS'+$q+',\s*'+$q+'[^'+$q+']*'+$q; if(-not [Text.RegularExpressions.Regex]::IsMatch($s,$pat)){Write-Host 'Error: no DECLARE_COMPONENT_VERSION version literal found in %SRC_FILE%'; exit 1}; $rep='DECLARE_COMPONENT_VERSION('+$q+'m-TAGS'+$q+', '+$q+$v+$q; $n=[Text.RegularExpressions.Regex]::Replace($s,$pat,$rep); if($n -eq $s){Write-Host ('Version already '+$v+' (unchanged)')}else{[IO.File]::WriteAllText($p,$n); Write-Host ('Version stamped: '+$v)}"
-exit /b %errorlevel%
 
 :fetchdep
 rem Fetches one pinned dependency (called by build.nmake). Transactional: download to a

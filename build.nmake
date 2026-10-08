@@ -44,7 +44,6 @@ SRCS = foo_tags.cpp core\album_art.cpp core\commandline.cpp core\config.cpp core
 # build in release\x64\ - which is exactly what a .fb2k-component holds.
 OUT32 = release\foo_tags.dll
 OUT64 = release\x64\foo_tags.dll
-VERSTAMP = obj\foo_tags.version.stamp
 
 # ---------------------------------------------------------------- deps
 
@@ -225,12 +224,6 @@ release:
 release\x64: release
 	@if not exist release\x64 mkdir release\x64
 
-# The component version is stamped into the source from resource\version.txt: no
-# generated header and no temp file, and the source is only rewritten when the
-# version actually differs.
-$(VERSTAMP): resource\version.txt
-	@call build.bat --stampver
-
 # One cl invocation per arch for the whole support set, then one archive.
 $(SUPPORTLIB32): $(SDK_SUPPORT_SRCS) build.nmake
 	@if not exist $(SDKOBJ32) mkdir $(SDKOBJ32)
@@ -246,13 +239,13 @@ $(SUPPORTLIB64): $(SDK_SUPPORT_SRCS) build.nmake
 
 # One compile-and-link per arch. The import library the linker produces for a DLL
 # is useless to a component, so it is sent to obj\ rather than left beside the DLL.
-$(OUT32): toolchain depsources $(VERSTAMP) $(SUPPORTLIB32) obj\x86 release $(SRCS) build.nmake
+$(OUT32): toolchain depsources $(SUPPORTLIB32) obj\x86 release $(SRCS) build.nmake
     $(CL32) $(BASE) $(INCLUDES) $(SRCS) /Foobj\x86\ /link /DLL /OUT:$@ /IMPLIB:obj\x86\foo_tags.lib \
 		$(LIBPATH32) "$(SUPPORTLIB32)" "$(SDKSHARED32)" $(SYSLIBS)
 	@$(LINK32) /dump /exports $@ | findstr /C:"foobar2000_get_interface" >NUL || (echo Error: $@ does not export foobar2000_get_interface - foobar2000 would not load it & exit 1)
 	@$(LINK32) /dump /headers $@ | findstr /C:"14C machine" >NUL || (echo Error: $@ is not a 32-bit binary & exit 1)
 
-$(OUT64): toolchain depsources $(VERSTAMP) $(SUPPORTLIB64) obj\x64 release\x64 $(SRCS) build.nmake
+$(OUT64): toolchain depsources $(SUPPORTLIB64) obj\x64 release\x64 $(SRCS) build.nmake
 	$(CL64) $(BASE) $(INCLUDES) $(SRCS) /Foobj\x64\ /link /DLL /OUT:$@ /IMPLIB:obj\x64\foo_tags.lib \
 		$(LIBPATH64) "$(SUPPORTLIB64)" "$(SDKSHARED64)" $(SYSLIBS)
 	@$(LINK64) /dump /exports $@ | findstr /C:"foobar2000_get_interface" >NUL || (echo Error: $@ does not export foobar2000_get_interface - foobar2000 would not load it & exit 1)
