@@ -11,7 +11,7 @@
 
 ### Evangelization
 
-I feel that one of the reasons m-TAGS stopped being updated was because a lot of people didn't "get" it and there was little evidence of many people using it. Case also solved the problem differently shortly after the last release, and for some cases, in a much better way. Still, there are cases where m-TAGS is really good- say you have music that shipped with a game- and you don't want to modify the underlying data- and you also don't want to pollute the directory with `.tag` sidecars, you'd rather not use things like NTFS Alternate Streams or sqlite databases as they just feel too "ephemeral". That, and you can have the `!.tags` file directly inside your regular music scan path for library use.
+I feel that one of the reasons m-TAGS stopped being updated was because a lot of people didn't "get" it and there was little evidence of many people using it. Case also [solved the problem differently](https://www.foobar2000.org/components/view/foo_external_tags) shortly after the last release, and for some cases, in a much better way. Still, there are cases where m-TAGS is really good- say you have music that shipped with a game- and you don't want to modify the underlying data- and you also don't want to pollute the directory with `.tag` sidecars, you'd rather not use things like NTFS Alternate Streams or sqlite databases as they just feel too "ephemeral". That, and you can have the `!.tags` file directly inside your regular music scan path for library use.
 
 While this is no longer an applicable use case- back when [TheQwertiest's Spotify plugin](https://github.com/TheQwertiest/foo_spotify) actually worked, it was a great way to add Spotify albums to your library as you had full control over the tagging and you could omit whatever tracks (sometimes excessive bonus tracks and discs exist on Spotify albums you may not want). It still has its place, it's not outmoded. For people with the right organization mentalities and desires, it's still relevant today.
 
@@ -25,12 +25,6 @@ Currently, no new features have been added- but I will likely implement some new
 Care has been taken to match GUIDs and menu functionalities so historic config and shortcut mapping should transfer over successfully.
 
 It supports fb2k 2.0 onward- if you need legacy compatibility, the original plugin is where it's at for you. I'm not bothering with arm64ec builds yet, but if someone really wants it native, I'll get the toolchain set up. You can still use the 64-bit plugin in ARM fb2k, for now (not tested).
-
-### Known bugs
-
-There is a bug the original has that this currently replicates- I will be fixing it sometime. Basically, if you use m-TAGS "embedded" album art in `filename.tags.type.bin` files and use the converter to convert from this m-TAGS to another set of files, the first art read will lock the file, leading any conversion beyond the first for that m-TAGS/art combo to fail to write the art metadata to the conversion target. This is one of the motivating factors of me just using folder art instead of metadata art, as with m-TAGS what's really the difference other than the filename and how foobar perceives it (internal vs. external)? Still, it should work right.
-
-It is worth noting that while I use this plugin alongside Case's [External Tags](https://www.foobar2000.org/components/view/foo_external_tags), and I haven't had issues with it, the original (and current) source has a special rule for files with the `.tag` naming scheme it uses for its sidecar variant that might cause some interoperability edge cases. I haven't run into any such issues, as I don't combine their usage. Still, it might be good for me to make an exception in the future, as External Tags didn't exist at the time of the final m-TAGS release.
 
 ### Building
 

@@ -157,19 +157,18 @@ std::string folder_wide_file(const std::string& folder) {
     return folder + "\\" + file;
 }
 
-// The original tested two names for a per-source document under the ONE message
-// "m-TAGS file with same name exists. Skipping %s": the decomp shows a single skip
-// fed by two existence checks (out.cpp:33050ff). Only ".tags" is ever written; the
-// other candidate is why a ".tag" file beside a source made that source look
-// already documented. Reproduced as the original's own behaviour.
-std::string per_source_file(const std::string& folder, const std::string& source,
-                            const char* extension = ".tags") {
+// The document a source gets in "a separate m-TAGS file for each source".
+// The original probed a ".tag" spelling of this name too and skipped the source
+// when either existed; ".tag" is Case's External Tags sidecar format and is no
+// longer handled at all, so only the document that would be written is asked
+// about.
+std::string per_source_file(const std::string& folder, const std::string& source) {
     const std::string name = file_name_of(source);
     std::string base = without_extension(name);
     if (config::keep_source_extensions()) {
         base += "." + extension_of(name);
     }
-    return folder + "\\" + base + extension;
+    return folder + "\\" + base + ".tags";
 }
 
 // ----------------------------------------------------------------- archives
@@ -429,13 +428,28 @@ std::string member_document(const std::string& container, const std::string& mem
 }
 
 // One candidate source - a file from the folder, or a member of an archive. The
-// exclusion list is the only test that stops one: the original queued everything
-// else and left the question of whether it is audio to the read, which is why a
-// .png is traced as queued and then yields nothing.
+// original put "Not an audio file" in front of this function's tests on the folder
+// path, and its exclusion list first inside them, so both are here in that order.
 void consider_source(const std::string& file, bool member,
                      const std::string& destination_folder, const std::string& document,
                      std::vector<t_job>& jobs) {
     log_verbose("Checking %s", file.c_str());
+
+    // ".tag" is Case's External Tags sidecar format, and it sits beside the media
+    // file it belongs to. It is not an m-TAGS document - the input service claims
+    // only "tags" and "mtags*" - so it is never a source here. Hardcoded instead
+    // of a config default, so an existing "Excluded extensions" list cannot turn
+    // the handling back on, and asked before the audio question below, which is
+    // what a ".tag" file would otherwise be answered with.
+    if (uppercase(extension_of(file)) == "TAG") {
+        log_verbose("Skipping External Tags sidecar: %s", file.c_str());
+        return;
+    }
+
+    if (!is_audio_file(file)) {
+        log_verbose("Not an audio file");
+        return;
+    }
 
     if (extension_excluded(file)) {
         log_verbose("File extension is excluded. Skipping %s", file.c_str());
@@ -465,9 +479,10 @@ void consider_source(const std::string& file, bool member,
             log_verbose("Folder m-TAGS file exists. Skipping %s", file.c_str());
             return;
         }
-        // Both candidates the original tested, under its one message.
-        if (exists(per_source_file(destination_folder, file, ".tag"))
-            || exists(per_source_file(destination_folder, file))) {
+        // The original tested a ".tag" spelling of this name here as well, under
+        // this same message. That half went with the ".tag" handling, so only the
+        // document that would be written is asked about.
+        if (exists(per_source_file(destination_folder, file))) {
             log_verbose("m-TAGS file with same name exists. Skipping %s", file.c_str());
             return;
         }
