@@ -5,6 +5,8 @@
 > * They are the creator of the m-TAGS specification and it literally wouldn't exist without them
 > * The official component is still readily available on the [official components page](http://www.foobar2000.org/components/view/foo_tags) if you have concerns about my build- however it is limited to 32-bit (which is what motivated this version)
 
+> **Important - config migration:** Config will be digested into the sqlite database on first load of this new plugin, as it uses the new config storage method. **Back up your `foo_tags.dll.cfg` ahead of time** if you feel you may revert to the original at any point (that's if you made any custom settings worth keeping, at least!).
+
 ---
 
 ### Evangelization
@@ -20,7 +22,7 @@ The original last shipped before 64-bit foobar2000 and it's no longer maintained
 
 Currently, no new features have been added- but I will likely implement some new features after making sure the baseline is actually good for real, like re-sorting entries; as m-TAGS strictly loads files with the original baked reference order and not by things like track number (and there's no way to shift the reference elements outside of manual text editing or some jq scripting like I do, *with caveats*). I currently use scripts to re-sort on the rare occasion I need it, and it would be ideal to implement directly.
 
-Care has been taken to match GUIDs and menu functionalities so historic config and shortcut mapping should transfer over successfully. Config will be digested into the sqlite database on first load of this new plugin, however, as it uses the new config storage method. Back up your `foo_tags.dll.cfg` ahead of time if you feel you may revert to the original at any point (that's if you made any custom settings worth keeping, at least!).
+Care has been taken to match GUIDs and menu functionalities so historic config and shortcut mapping should transfer over successfully.
 
 It supports fb2k 2.0 onward- if you need legacy compatibility, the original plugin is where it's at for you. I'm not bothering with arm64ec builds yet, but if someone really wants it native, I'll get the toolchain set up. You can still use the 64-bit plugin in ARM fb2k, for now (not tested).
 
