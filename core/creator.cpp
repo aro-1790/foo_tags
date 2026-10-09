@@ -85,14 +85,6 @@ bool exists(const std::string& path) {
     return filesystem::g_exists(path.c_str(), fb2k::noAbort);
 }
 
-// A selected item this command can act on is a document, not media.
-bool is_document_path(const std::string& path) {
-    const std::string ext = uppercase(extension_of(path));
-    // Exactly the extensions the input service claims - "tags", or the literal
-    // "mtags*" form whose final character the open routine drops.
-    return ext == "TAGS" || ext == "MTAGS*";
-}
-
 // The folder a path lives in. A file inside an archive is held by the folder that
 // holds the archive: taking the folder of the unpack path itself yields a
 // truncated URL, which is not a path any filesystem will accept.

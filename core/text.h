@@ -56,4 +56,12 @@ inline std::string extension_of(const std::string& name) {
     return pfc::string_extension(name.c_str()).c_str();
 }
 
+// A path whose extension is one the input service claims: a ".tags" document, or the
+// literal "mtags*" form whose final character the open routine drops. Everything
+// that has to tell a document from media asks this.
+inline bool is_document_path(const std::string& path) {
+    const std::string ext = uppercase(extension_of(path));
+    return ext == "TAGS" || ext == "MTAGS*";
+}
+
 } // namespace mtags
