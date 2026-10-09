@@ -1,6 +1,8 @@
 // Menu registration: the File menu popup and the context-menu entries.
 //
 // The four command GUIDs are the original's, and so is which pair belongs where.
+// The two re-sort commands are this plugin's own and carry fresh GUIDs - there was
+// no such command in the original to inherit one from.
 // Reading the GUID tables out of the original's data settles it, because each pair
 // sits at the address its own service reads:
 //
@@ -28,6 +30,7 @@
 
 #include "creator.h"
 #include "log.h"
+#include "sorting.h"
 
 namespace {
 
@@ -44,6 +47,12 @@ const GUID guid_create_file =
     { 0xdfcd8570, 0x6567, 0x4b07, { 0xaa, 0x50, 0x35, 0x7e, 0xfd, 0xec, 0xf8, 0x0b } };
 const GUID guid_write_to_media =
     { 0xb4a27a4d, 0x2dd1, 0x46bc, { 0x86, 0xd6, 0xd6, 0x76, 0xc6, 0x0f, 0x1e, 0xd7 } };
+
+// The two re-sort commands, new here.
+const GUID guid_resort_track_number =
+    { 0x6d434d87, 0x696d, 0x48a9, { 0x9a, 0x58, 0x52, 0x2e, 0xb1, 0x8e, 0xde, 0xab } };
+const GUID guid_resort_playlist_order =
+    { 0x59c0afd4, 0xa814, 0x44a7, { 0xa2, 0x67, 0x3d, 0x77, 0xb1, 0xfc, 0xc0, 0x56 } };
 
 // The group GUID is the original's too, read from the GUID table at 0x10064FA0 that
 // sits directly above the two folder-wide GUIDs. (foobar2000 never persists a
@@ -62,6 +71,12 @@ const char* const name_create = "Create m-TAGS file";
 const char* const name_write = "Write m-TAGS to media files";
 const char* const desc_create = "Create an m-TAGS file from selected sources";
 const char* const desc_write = "Write m-TAGS metadata back into media files";
+const char* const name_resort_number = "Re-sort m-TAGS by track number";
+const char* const name_resort_playlist = "Re-sort m-TAGS reflecting playlist order";
+const char* const desc_resort_number =
+    "Re-order the selected m-TAGS file's entries by track number";
+const char* const desc_resort_playlist =
+    "Re-order the selected m-TAGS file's entries to match the playlist";
 
 // The original registered its popup at this priority, which is what draws it as
 // its own separator block rather than glued to the top of the File menu.
@@ -114,14 +129,24 @@ mainmenu_commands_factory_t<t_file_commands> g_file_commands;
 
 class t_context_commands : public contextmenu_item_simple {
 public:
-    unsigned get_num_items() override { return 2; }
+    unsigned get_num_items() override { return 4; }
 
     GUID get_item_guid(unsigned index) override {
-        return index == 0 ? guid_create_file : guid_write_to_media;
+        switch (index) {
+        case 0: return guid_create_file;
+        case 1: return guid_write_to_media;
+        case 2: return guid_resort_track_number;
+        default: return guid_resort_playlist_order;
+        }
     }
 
     void get_item_name(unsigned index, pfc::string_base& out) override {
-        out = index == 0 ? name_create : name_write;
+        switch (index) {
+        case 0: out = name_create; break;
+        case 1: out = name_write; break;
+        case 2: out = name_resort_number; break;
+        default: out = name_resort_playlist; break;
+        }
     }
 
     // The original placed these under the Tagging group by GUID; it never carried the
@@ -132,7 +157,12 @@ public:
     }
 
     bool get_item_description(unsigned index, pfc::string_base& out) override {
-        out = index == 0 ? desc_create : desc_write;
+        switch (index) {
+        case 0: out = desc_create; break;
+        case 1: out = desc_write; break;
+        case 2: out = desc_resort_number; break;
+        default: out = desc_resort_playlist; break;
+        }
         return true;
     }
 
@@ -140,11 +170,11 @@ public:
     // (contextmenu_item_simple) answers with.
 
     void context_command(unsigned index, metadb_handle_list_cref items, const GUID&) override {
-        if (index == 0) {
-            create_from_selection(items);
-        }
-        else {
-            write_tags_to_media(items);
+        switch (index) {
+        case 0: create_from_selection(items); break;
+        case 1: write_tags_to_media(items); break;
+        case 2: resort_by_track_number(items); break;
+        default: resort_by_playlist_order(items); break;
         }
     }
 };

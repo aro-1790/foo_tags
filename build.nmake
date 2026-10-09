@@ -37,7 +37,7 @@ INCLUDES = /I. /I"$(SDK_DIR)" /I"$(SDK_DIR)\foobar2000" /I"$(JSONCPP_INC)"
 
 SRCS = foo_tags.cpp core\album_art.cpp core\commandline.cpp core\config.cpp core\creator.cpp core\format.cpp \
        core\input.cpp core\locator.cpp core\log.cpp core\media.cpp core\menu.cpp \
-       core\prefixes.cpp core\reference.cpp core\writer.cpp \
+       core\prefixes.cpp core\reference.cpp core\sorting.cpp core\writer.cpp \
        $(JSONCPP_SRCS)
 
 # The build writes the component layout directly - x86 at the root of release\, the x64
@@ -82,9 +82,13 @@ JSONCPP_SRCS = $(JSONCPP_DIR)\src\lib_json\json_reader.cpp \
 
 # ---------------------------------------------------------------- SDK support libs
 #
-# One combined static library per architecture goes into deps\lib: `clean` leaves it
-# alone, `cleandep` clears it with the fetched sources. The lists are the SDK projects'
-# own source lists minus the stdafx stubs, which only generate precompiled headers.
+# One combined static library per architecture goes into deps\lib, from objects in
+# obj\sdk*: `clean` takes the objects with the rest of obj\ but leaves the library,
+# `cleandep` takes the library too - the next build then builds both again from the
+# fetched sources, with no re-download. The libraries depend on their sources only, so a
+# change to a support flag below needs `build.bat cleandep` to take effect.
+# The lists are the SDK projects' own source lists minus the stdafx stubs, which only
+# generate precompiled headers.
 
 SDK_PFC_SRCS = \
 	$(SDK_DIR)\pfc\audio_math.cpp $(SDK_DIR)\pfc\audio_sample.cpp $(SDK_DIR)\pfc\base64.cpp $(SDK_DIR)\pfc\bigmem.cpp \
@@ -225,13 +229,13 @@ release\x64: release
 	@if not exist release\x64 mkdir release\x64
 
 # One cl invocation per arch for the whole support set, then one archive.
-$(SUPPORTLIB32): $(SDK_SUPPORT_SRCS) build.nmake
+$(SUPPORTLIB32): $(SDK_SUPPORT_SRCS)
 	@if not exist $(SDKOBJ32) mkdir $(SDKOBJ32)
 	@if not exist $(DEPS_DIR)\lib\x86 mkdir $(DEPS_DIR)\lib\x86
 	$(CL32) $(SDK_SUPPORT_FLAGS) /Fo$(SDKOBJ32)\ $(SDK_SUPPORT_SRCS)
 	$(LIBEXE32) /nologo /OUT:$@ $(SDKOBJ32)\*.obj
 
-$(SUPPORTLIB64): $(SDK_SUPPORT_SRCS) build.nmake
+$(SUPPORTLIB64): $(SDK_SUPPORT_SRCS)
 	@if not exist $(SDKOBJ64) mkdir $(SDKOBJ64)
 	@if not exist $(DEPS_DIR)\lib\x64 mkdir $(DEPS_DIR)\lib\x64
 	$(CL64) $(SDK_SUPPORT_FLAGS) /Fo$(SDKOBJ64)\ $(SDK_SUPPORT_SRCS)
@@ -251,16 +255,22 @@ $(OUT64): toolchain depsources $(SUPPORTLIB64) obj\x64 release\x64 $(SRCS) build
 	@$(LINK64) /dump /exports $@ | findstr /C:"foobar2000_get_interface" >NUL || (echo Error: $@ does not export foobar2000_get_interface - foobar2000 would not load it & exit 1)
 	@$(LINK64) /dump /headers $@ | findstr /C:"8664 machine" >NUL || (echo Error: $@ is not a 64-bit binary & exit 1)
 
-# Everything the build creates. deps\ is cleandep's, and release\ stays - a packaged
-# .fb2k-component is not the build's to delete. No line here may return non-zero:
-# nmake treats that as a fatal error and stops the whole run.
+# The component's own outputs, plus obj\ which the SDK objects share. deps\lib is
+# cleandep's, and release\ stays - a packaged .fb2k-component is not the build's to
+# delete. No line here may return non-zero: nmake treats that as a fatal error and stops
+# the whole run.
 clean:
 	@if not exist obj if not exist $(OUT32) if not exist release\x64 if not exist release\*.fb2k-component echo   nothing to remove
 	@if exist obj (rmdir /s /q obj & echo   removed obj\)
 	@if exist release\x64 (rmdir /s /q release\x64 & echo   removed release\x64\)
 	@if exist $(OUT32) (del /q $(OUT32) & echo   removed $(OUT32))
 
-# Everything under deps\: the fetched trees and the cached support libraries.
+# The built dependencies only. The fetched trees under deps\ are left alone, so this is a
+# rebuild of them rather than a re-download. The SDK objects go with the libraries they
+# were archived into: the recipe compiles the whole set again anyway, so leaving them
+# would only be dead weight.
 cleandep:
-	@if not exist $(DEPS_DIR) echo   nothing to remove
-	@if exist $(DEPS_DIR) (rmdir /s /q $(DEPS_DIR) & echo   removed $(DEPS_DIR)\)
+	@if not exist $(DEPS_DIR)\lib if not exist $(SDKOBJ32) if not exist $(SDKOBJ64) echo   nothing to remove
+	@if exist $(DEPS_DIR)\lib (rmdir /s /q $(DEPS_DIR)\lib & echo   removed $(DEPS_DIR)\lib\)
+	@if exist $(SDKOBJ32) (rmdir /s /q $(SDKOBJ32) & echo   removed $(SDKOBJ32)\)
+	@if exist $(SDKOBJ64) (rmdir /s /q $(SDKOBJ64) & echo   removed $(SDKOBJ64)\)
