@@ -28,18 +28,10 @@ inline std::string uppercase(std::string s) {
     return uppercase(s.c_str());
 }
 
-// Case-sensitive and case-insensitive "does s start with this": pfc's partial
-// compares, which are what the original used to test names and extensions.
+// "Does s start with this": pfc's partial compare, which is what the original used
+// to test names and extensions.
 inline bool starts_with(const std::string& s, const char* prefix) {
     return pfc::strcmp_partial(s.c_str(), prefix) == 0;
-}
-
-inline bool starts_with_ci(const char* s, const char* prefix) {
-    return pfc::stricmp_ascii_partial(s, prefix) == 0;
-}
-
-inline bool starts_with_ci(const char* s, const std::string& prefix) {
-    return starts_with_ci(s, prefix.c_str());
 }
 
 inline bool ends_with_ci(const std::string& s, const char* tail) {

@@ -22,7 +22,6 @@ bool ignore_source_tags();
 bool do_not_parse_archives();
 pfc::string8 excluded_extensions();  // default ""
 bool keep_source_extensions();
-bool overwrite_existing();
 bool separate_file_per_source();
 bool only_absolute_paths();
 

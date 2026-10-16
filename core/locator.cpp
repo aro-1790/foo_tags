@@ -49,14 +49,4 @@ t_locator t_locator::parse(const std::string& raw) {
     return out;
 }
 
-unsigned t_locator::index_within(size_t set_count) const {
-    if (index == 0) {
-        return 1;
-    }
-    if (index > set_count) {
-        reject_index(std::to_string(index));
-    }
-    return index;
-}
-
 } // namespace mtags

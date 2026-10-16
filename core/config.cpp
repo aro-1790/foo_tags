@@ -73,7 +73,6 @@ bool ignore_source_tags()        { return g_ignore_source_tags.get(); }
 bool do_not_parse_archives()     { return g_no_parse_archives.get(); }
 pfc::string8 excluded_extensions() { return g_excluded_ext.get(); }
 bool keep_source_extensions()    { return g_keep_src_ext.get(); }
-bool overwrite_existing()        { return g_overwrite.get(); }
 bool separate_file_per_source()  { return g_separate_file.get(); }
 bool only_absolute_paths()       { return g_absolute_paths.get(); }
 

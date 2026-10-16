@@ -401,15 +401,13 @@ std::string t_document::serialise() const {
     return writer.write(root);
 }
 
-namespace {
-
 // The verbose tag-set dump, rendered by the SAME writer the file goes through, which
 // is what the original did - and why its console shows an array as "[ \"214.09\" ]".
 // Values keep the form they were read in, so an array-form single value prints as an
 // array rather than as a plain string: verified against the original's console.
 // StyledWriter ends its document with a newline, and the caller's line supplies one,
 // so that trailing newline is dropped.
-std::string dump_tag_set(const t_tag_set& tags) {
+std::string render_tag_set(const t_tag_set& tags) {
     Json::Value object(Json::objectValue);
     for (const auto& kv : tags) {
         const t_tag& t = kv.second;
@@ -431,12 +429,6 @@ std::string dump_tag_set(const t_tag_set& tags) {
         out.erase(out.size() - 1);
     }
     return out;
-}
-
-} // namespace
-
-std::string render_tag_set(const t_tag_set& tags) {
-    return dump_tag_set(tags);
 }
 
 }

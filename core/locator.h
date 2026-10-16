@@ -27,11 +27,6 @@ struct t_locator {
     // up front, because a one-character locator cannot be a path - that is the
     // "Invalid path: %s" branch the original took before resolving.
     static t_locator parse(const std::string& raw);
-
-    // Applies the 1-based convention and the range check. A subsong past the
-    // last tag set throws the same exception_io_data the original threw, after
-    // logging "Invalid subsong index: %s".
-    unsigned index_within(size_t set_count) const;
 };
 
 } // namespace mtags

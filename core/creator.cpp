@@ -524,8 +524,6 @@ void plan_folder(const std::string& source_folder, const std::string& destinatio
 
         // An archive with parsing allowed is a container, not a candidate: the
         // original never tested it, it walked its members into a document of their
-        // An archive with parsing allowed is a container, not a candidate: the
-        // original never tested it, it walked its members into a document of their
         // own - named after the archive - and left the folder-wide document to the
         // loose files.
         if (!config::do_not_parse_archives() && is_archive_file(file)) {
@@ -703,11 +701,10 @@ namespace {
 // `…\dest\!.tags`, with `TO: …\dest` in its log. The source folder's name is NOT
 // mirrored; the name the original appends (FUN_10020390) is the per-source document
 // name used by separate-file mode. The File menu's two commands share this.
-bool add_folder_job(std::vector<t_folder_job>& jobs, const std::string& source,
+void add_folder_job(std::vector<t_folder_job>& jobs, const std::string& source,
                     const std::string& destination, bool same_folder) {
     jobs.push_back(t_folder_job{
         source, same_folder ? source : without_trailing_separator(native_path(destination.c_str())) });
-    return true;
 }
 
 } // namespace
@@ -741,9 +738,7 @@ void create_folder_wide_browse(bool same_folder) {
             log_error("Invalid folder selected");
             return;
         }
-        if (!add_folder_job(jobs, folder, destination.get_ptr(), false)) {
-            return;
-        }
+        add_folder_job(jobs, folder, destination.get_ptr(), false);
     }
     else {
         // The document goes into the folder that holds the sources.
