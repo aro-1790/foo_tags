@@ -150,6 +150,11 @@ bool reorder(t_document& doc, const std::vector<unsigned>& slots, t_kind kind) {
 // entries in its own old order, because an item stands for an entry *position*: after a
 // permute, the item reading "entry 3" simply holds whatever entry 3 now holds.
 //
+// One document's items per call: an entry number counts entries of its own file, so a pool
+// holding several documents would compare unrelated numbers and lay their items into each
+// other's slots - the caller groups, because the caller is what knows where each item came
+// from. The gather below is unchanged.
+//
 // Gather permutation, the way the SDK builds its own: order[new position] is the old
 // index that belongs there.
 void reorder_playlists(const std::vector<t_item>& items) {
@@ -232,7 +237,7 @@ void run_resort(metadb_handle_list items, t_kind kind) {
     log_error("Number of entries: %s", pfc::format_uint(items.get_count()).get_ptr());
 
     auto refresh = std::make_shared<metadb_handle_list>();
-    auto moved = std::make_shared<std::vector<t_item>>();
+    auto moved = std::make_shared<std::vector<std::vector<t_item>>>();
 
     threaded_process::g_run_modeless(
         threaded_process_callback_lambda::create(
@@ -315,15 +320,22 @@ void run_resort(metadb_handle_list items, t_kind kind) {
                     // The playlist's own order is wrong for a different reason now: an item
                     // stands for an entry position, so the items this rewrite re-labelled have
                     // to be put into the file's order as well, or the playlist keeps showing
-                    // the file's entries in its own old order.
+                    // the file's entries in its own old order. One list per document: an entry
+                    // number counts entries of its own file, and a pool holding several
+                    // documents would compare unrelated numbers.
+                    std::vector<t_item> rewritten;
+                    rewritten.reserve(group.handles.size());
                     for (t_size handle : group.handles) {
                         const unsigned subsong = items[handle]->get_subsong_index();
-                        moved->push_back(t_item{ items[handle], subsong == 0 ? 1u : subsong });
+                        rewritten.push_back(t_item{ items[handle], subsong == 0 ? 1u : subsong });
                     }
+                    moved->push_back(std::move(rewritten));
                 }
             },
             [refresh, moved](auto, bool) {
-                reorder_playlists(*moved);
+                for (const std::vector<t_item>& document : *moved) {
+                    reorder_playlists(document);
+                }
 
                 // A reload, not a repaint. dispatch_refresh only asks components to redraw
                 // from the metadb's own copy, which still holds the tags as they were
