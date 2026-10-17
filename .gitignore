@@ -16,3 +16,4 @@ deps/
 
 # Symlink to the restored m-tags.org site - not part of this repo
 /web
+.pi/
