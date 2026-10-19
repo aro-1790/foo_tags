@@ -9,7 +9,7 @@
 
 // Stamped from resource/version.txt into this literal by ./version.sh - do not
 // edit by hand. This is the string foobar2000 shows in its component list.
-DECLARE_COMPONENT_VERSION("m-TAGS", "1.2.0",
+DECLARE_COMPONENT_VERSION("m-TAGS", "1.2.1",
     "The m-TAGS format offers a simple yet powerful solution to the media-metadata separation problem.\n"
     "An m-TAGS file is media-independent: it contains only metadata describing a media source, and a locator identifying the source to which the metadata applies.\n"
     "\n"
