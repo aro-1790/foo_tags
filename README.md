@@ -20,7 +20,7 @@ While this is no longer an applicable use case- back when [TheQwertiest's Spotif
 A drop-in decomp-to-recreation of **foo_tags**, the foobar2000 implementation (the only implementation?) of Luigi's m-TAGS specification. You can read up on the format and its specification on this [restored](https://adamodell.alwaysdata.net/mtags/) version of the original page.
 The original last shipped before 64-bit foobar2000 and it's no longer maintained, necessitating this hack job. It still uses [JsonCpp](https://github.com/open-source-parsers/jsoncpp) like the original due to its permissiveness and to keep the codebase as similar as possible.
 
-Currently, no new features have been added- but I will likely implement some new features after making sure the baseline is actually good for real, like re-sorting entries; as m-TAGS strictly loads files with the original baked reference order and not by things like track number (and there's no way to shift the reference elements outside of manual text editing or some jq scripting like I do, *with caveats*). I currently use scripts to re-sort on the rare occasion I need it, and it would be ideal to implement directly.
+Native re-sorting of the m-TAGS data structure is a new feature over the original (be it by track number or by playlist order), replacing the external script-based workflow I previously relied on.
 
 Care has been taken to match GUIDs and menu functionalities so historic config and shortcut mapping should transfer over successfully.
 
