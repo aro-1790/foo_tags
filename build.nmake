@@ -29,7 +29,7 @@ LIBEXE32 = "$(VCTOOLSINSTALLDIR)bin\Host$(HOST32)\x86\lib.exe"
 LIBEXE64 = "$(VCTOOLSINSTALLDIR)bin\Host$(HOST64)\x64\lib.exe"
 
 # No version resource: foobar2000 takes the version from DECLARE_COMPONENT_VERSION in the source.
-BASE = /nologo /O2 /MD /EHsc /W3 /std:c++20 /DNDEBUG /DUNICODE /D_UNICODE /DWIN32 \
+BASE = /nologo /O2 /MD /EHsc /W3 /std:c++20 /d2notypeopt /DNDEBUG /DUNICODE /D_UNICODE /DWIN32 \
        /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /D_USRDLL \
        /DFOOBAR2000_TARGET_VERSION=$(FB2K_TARGET)
 
@@ -122,7 +122,7 @@ SDK_SUPPORT_SRCS = $(SDK_PFC_SRCS) $(SDK_FB2K_SRCS) \
 	$(SDK_DIR)\foobar2000\foobar2000_component_client\component_client.cpp
 
 # SDK code is not ours, so no /W3; C++20 and /MD match the SDK projects.
-SDK_SUPPORT_FLAGS = /nologo /c /O2 /MD /DNDEBUG /EHsc /std:c++20 \
+SDK_SUPPORT_FLAGS = /nologo /c /O2 /MD /d2notypeopt /DNDEBUG /EHsc /std:c++20 \
 	/DUNICODE /D_UNICODE /DWIN32 \
 	/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS \
 	/DFOOBAR2000_TARGET_VERSION=$(FB2K_TARGET) \
